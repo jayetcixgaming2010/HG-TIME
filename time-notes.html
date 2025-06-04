@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HG Time - Ghi chú thời gian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.5s, color 0.5s;
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+        }
+        .theme-blue { background: linear-gradient(135deg, #1e3a8a, #60a5fa); color: #1f2937; }
+        .theme-green { background: linear-gradient(135deg, #14532d, #4ade80); color: #1f2937; }
+        .theme-purple { background: linear-gradient(135deg, #4c1d95, #a78bfa); color: #1f2937; }
+        .dark-mode { background: linear-gradient(135deg, #1e293b, #475569); color: #f1f5f9; }
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark-mode .navbar {
+            background: rgba(31, 41, 55, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .nav-link {
+            transition: color 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+            transform: translateY(-2px);
+        }
+        .animate-section {
+            opacity: 0;
+        }
+        .note-item {
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            margin-bottom: 12px;
+        }
+        .dark-mode .note-item {
+            background: rgba(31, 41, 55, 0.95);
+        }
+        .note-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        .tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+        }
+        .menu-toggle {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: inherit;
+                padding: 1rem;
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="theme-blue">
+    <nav class="navbar fixed top-0 left-0 right-0 z-10 p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-900 dark:text-blue-300">HG Time</h1>
+            <button class="menu-toggle text-gray-800 dark:text-gray-200 md:hidden" onclick="toggleMenu()">☰</button>
+            <div class="nav-links flex space-x-4 md:flex">
+                <a href="index.html" class="nav-link text-gray-800 dark:text-gray-200 font-semibold"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l10 10h-4v8h-12v-8H2L12 2z"/></svg>Trang chủ</a>
+                <a href="current-time.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 01 16zm1-13h-2v6l5.2 3.2 1-1.7-4.2-2.5V7z"/></svg>Thời gian</a>
+                <a href="alarm.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 5.7l-4.6-3.9-1.3 1.5 4.6 3.9L22 5.7zM7.9 3.4L6.6 1.9 2 5.7l1.3 1.5 4.6-3.9zM12 4a9 9 0 00-9 9c0 4.97 4.02 9 9 9s9-4.03 9-9a9 9 0 00-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zm1-11h-2v4H7v2h4v4h2v-4h4v-2h-4V9z"/></svg>Báo thức</a>
+                <a href="countdown.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 01 16zm1-13h-2v6l5.2 3.2 1-1.7-4.2-2.5V7z"/></svg>Đếm ngược</a>
+                <a href="stopwatch.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 01 16zm1-13h-2v6l5.2 3.2 1-1.7-4.2-2.5V7z"/></svg>Bấm giờ</a>
+                <a href="time-notes.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V5h14v14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/></svg>Ghi chú</a>
+                <a href="calendar.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V8h14v11z"/></svg>Lịch</a>
+                <select id="theme-select" class="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-500">
+                    <option value="theme-blue">Màu xanh</option>
+                    <option value="theme-green">Màu xanh lá</option>
+                    <option value="theme-purple">Màu tím</option>
+                    <option value="dark-mode">Tối</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6 mt-20">
+        <div class="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-section">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Ghi chú thời gian</h2>
+            <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2">
+                <input type="text" id="note-text" placeholder="Nội dung ghi chú" class="p-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 note-input">
+                <input type="text" id="note-tag" placeholder="Danh mục (ví dụ: Công việc)" class="p-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 note-input">
+                <button onclick="addNote()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Thêm ghi chú</button>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-2 mt-4">
+                <input type="text" id="search-note" placeholder="Tìm kiếm ghi chú..." class="p-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 note-input w-full md:w-1/2">
+                <select id="filter-tag" class="p-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 w-full md:w-1/4">
+                    <option value="">Tất cả danh mục</option>
+                </select>
+                <select id="sort-notes" class="p-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 w-full md:w-1/4">
+                    <option value="time-desc">Mới nhất</option>
+                    <option value="time-asc">Cũ nhất</option>
+                    <option value="text-asc">A-Z</option>
+                    <option value="text-desc">Z-A</option>
+                </select>
+            </div>
+            <div id="note-list" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme(theme) {
+            document.body.classList.remove('theme-blue', 'theme-green', 'theme-purple', 'dark-mode');
+            document.body.classList.add(theme);
+            localStorage.setItem('theme', theme);
+        }
+        if (localStorage.getItem('theme')) {
+            toggleTheme(localStorage.getItem('theme'));
+        }
+
+        function toggleMenu() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+
+        document.getElementById('theme-select').addEventListener('change', (e) => {
+            toggleTheme(e.target.value);
+        });
+
+        anime({
+            targets: '.animate-section',
+            translateY: [-20, 0],
+            opacity: [0, 1],
+            duration: 800,
+            easing: 'easeOutQuad',
+            delay: anime.stagger(100)
+        });
+
+        let notes = JSON.parse(localStorage.getItem('timeNotes')) || [];
+        let events = JSON.parse(localStorage.getItem('calendarEvents')) || [];
+        const tagColors = {
+            'Công việc': 'bg-blue-500 text-white',
+            'Cá nhân': 'bg-green-500 text-white',
+            'Khác': 'bg-purple-500 text-white'
+        };
+
+        function addNote() {
+            const noteText = document.getElementById('note-text').value;
+            let noteTag = document.getElementById('note-tag').value || 'Khác';
+            if (!noteText) return;
+
+            if (!Object.keys(tagColors).includes(noteTag)) {
+                noteTag = 'Khác';
+            }
+
+            const note = { text: noteText, tag: noteTag, timestamp: new Date().toISOString() };
+            notes.push(note);
+            events.push({ name: noteText, date: note.timestamp });
+            localStorage.setItem('timeNotes', JSON.stringify(notes));
+            localStorage.setItem('calendarEvents', JSON.stringify(events));
+            document.getElementById('note-text').value = '';
+            document.getElementById('note-tag').value = '';
+            updateNoteList();
+            updateTagFilter();
+        }
+
+        function updateTagFilter() {
+            const filterTag = document.getElementById('filter-tag');
+            const tags = [...new Set(notes.map(note => note.tag))];
+            filterTag.innerHTML = '<option value="">Tất cả danh mục</option>';
+            tags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                filterTag.appendChild(option);
+            });
+        }
+
+        function updateNoteList() {
+            const searchText = document.getElementById('search-note').value.toLowerCase();
+            const filterTag = document.getElementById('filter-tag').value;
+            const sortOption = document.getElementById('sort-notes').value;
+            let filteredNotes = notes.filter(note =>
+                note.text.toLowerCase().includes(searchText) &&
+                (filterTag === '' || note.tag === filterTag)
+            );
+
+            if (sortOption === 'time-desc') {
+                filteredNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            } else if (sortOption === 'time-asc') {
+                filteredNotes.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            } else if (sortOption === 'text-asc') {
+                filteredNotes.sort((a, b) => a.text.localeCompare(b.text));
+            } else if (sortOption === 'text-desc') {
+                filteredNotes.sort((a, b) => b.text.localeCompare(a.text));
+            }
+
+            const noteList = document.getElementById('note-list');
+            noteList.innerHTML = '';
+            filteredNotes.forEach((note, index) => {
+                const div = document.createElement('div');
+                div.className = 'note-item shadow';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <input type="text" value="${note.text}" readonly class="note-input bg-transparent text-gray-800 dark:text-gray-200 w-full" data-index="${index}">
+                        <span class="tag ${tagColors[note.tag]}">${note.tag}</span>
+                    </div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mt-2">${new Date(note.timestamp).toLocaleString('vi-VN')}</div>
+                    <div class="flex space-x-2 mt-2">
+                        <button onclick="editNote(${index})" class="px-2 py-1 bg-yellow-600 text-white rounded-md hover:bg-yellow-700">Sửa</button>
+                        <button onclick="saveNote(${index})" class="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 hidden">Lưu</button>
+                        <button onclick="deleteNote(${index})" class="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700">Xóa</button>
+                    </div>`;
+                noteList.appendChild(div);
+            });
+
+            anime({
+                targets: '.note-item',
+                translateX: [-20, 0],
+                opacity: [0, 1],
+                duration: 500,
+                easing: 'easeOutQuad',
+                delay: anime.stagger(50)
+            });
+        }
+
+        function editNote(index) {
+            const input = document.querySelector(`.note-input[data-index="${index}"]`);
+            input.readOnly = false;
+            input.focus();
+            input.parentElement.parentElement.querySelector('.tag').contentEditable = true;
+            input.parentElement.parentElement.querySelector('.tag').focus();
+            input.parentElement.parentElement.querySelector('button:nth-child(1)').classList.add('hidden');
+            input.parentElement.parentElement.querySelector('button:nth-child(2)').classList.remove('hidden');
+        }
+
+        function saveNote(index) {
+            const input = document.querySelector(`.note-input[data-index="${index}"]`);
+            const tag = input.parentElement.parentElement.querySelector('.tag').textContent;
+            notes[index].text = input.value;
+            notes[index].tag = Object.keys(tagColors).includes(tag) ? tag : 'Khác';
+            notes[index].timestamp = new Date().toISOString();
+            localStorage.setItem('timeNotes', JSON.stringify(notes));
+            input.readOnly = true;
+            input.parentElement.parentElement.querySelector('.tag').contentEditable = false;
+            input.parentElement.parentElement.querySelector('button:nth-child(1)').classList.remove('hidden');
+            input.parentElement.parentElement.querySelector('button:nth-child(2)').classList.add('hidden');
+            updateNoteList();
+        }
+
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            localStorage.setItem('timeNotes', JSON.stringify(notes));
+            updateNoteList();
+        }
+
+        document.getElementById('search-note').addEventListener('input', updateNoteList);
+        document.getElementById('filter-tag').addEventListener('change', updateNoteList);
+        document.getElementById('sort-notes').addEventListener('change', updateNoteList);
+
+        updateTagFilter();
+        updateNoteList();
+    </script>
+</body>
+</html>
