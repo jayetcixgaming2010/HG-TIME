@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HG Time - Lịch</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            background-size: 200% 200%;
+            animation: gradient 15s ease infinite;
+        }
+        .theme-blue {
+            background: linear-gradient(135deg, #1e3a8a, #60a5fa);
+            color: #1f2937;
+        }
+        .theme-green {
+            background: linear-gradient(135deg, #14532d, #4ade80);
+            color: #1f2937;
+        }
+        .theme-purple {
+            background: linear-gradient(135deg, #4c1d95, #a78bfa);
+            color: #1f2937;
+        }
+        .dark-mode {
+            background: linear-gradient(135deg, #1e293b, #475569);
+            color: #f1f5f9;
+        }
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .dark-mode .navbar {
+            background: rgba(31, 41, 55, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .nav-link {
+            transition: color 0.3s ease, transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+            transform: translateY(-2px);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        .calendar-day {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            min-height: 120px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .dark-mode .calendar-day {
+            background: rgba(31, 41, 55, 0.95);
+        }
+        .calendar-day:hover {
+            transform: scale(1.02);
+        }
+        .event-item {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            cursor: move;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .dark-mode .modal-content {
+            background: rgba(31, 41, 55, 0.95);
+        }
+        .animate-section {
+            opacity: 0;
+        }
+        .menu-toggle {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: inherit;
+                padding: 1rem;
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="theme-blue">
+    <nav class="navbar fixed top-0 left-0 right-0 z-10 p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue">900 dark:text-blue-300">HG Time</h1>
+            <button class="menu-toggle text-gray-800 dark:text-gray-200 md:hidden" onclick="toggleMenu()">☰</button>
+            <div class="nav-links flex space-x-4 md:flex">
+                <a href="index.html" class="nav-link text-gray-800 dark:text-gray-200 font-semibold"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l10 10h-4v8h4v8h-12v-8H-8h2L12 2z"/></svg>Trang chủ</a>
+                <a href="current-time.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 110 16zm1-13h-2v6l5.2 3.2 1-1.7-4.2-2.5V7z"/></svg>Thời gian</a>
+                <a href="alarm.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-w5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 5.7l-4.6-3.9-1.3 1.5 4.6 3.9L22 5.7zM7.6 3.4L6.6 1.9 2 5.7l1.3 1.5 4.9-3.9zM12 4a9 9 0 00-9 9c0 4.97 4.02 9 9 9s9-4.03 9-9a9-9 a0 00-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.7 7-3.14 7-7-7 7zm1-11h-2v4H7v2h4v4h2v-4h4v-2h-4V9z"/></svg>Báo thức</a>
+                <a href="countdown.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 110 16zm1-13h-2v6l5.2 3.2 1-1.7-4.2-2.5V7z"/></svg>Đếm ngược</a>
+                <a href="stopwatch.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 100 20 10 10 0 0 000-20zm0 18a8 8 0 110-16 8 8 0 110-16zm1-13h-2v6l5.2 3.2 1-1.7-4.2-2.5V7z"/></svg>Bấm giờ</a>
+                <a href="time-notes.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H5V5h14v14zM7 7h10v2H7V7zm7 4h10v2H7v-2zm0 4h4v2H7v-2z"/></svg>Ghi chú</a>
+                <a href="calendar.html" class="nav-link text-gray-800 dark:text-gray-200"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 0 002-2V5a2 0 2 0 0-2-2zm0 16H5V8h14v11z"/></svg>Lịch</a>
+                <select id="theme-select" class="p-2 px-1 py-3 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-gray-500">
+                    <option value="theme-blue">Màu xanh</option>
+                    <option value="theme-green">Màu xanh lá</option>
+                    <option value="theme-purple">Màu tím</option>
+                    <option value="dark-mode">Tối</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6 mt-20">
+        <div class="mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg animate-section">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Lịch tháng</h2>
+                <div class="flex space-x-2">
+                    <button onclick="previousMonth()" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">Tháng trước</button>
+                    <span id="current-month" class="text-lg font-semibold"></span>
+                    <button onclick="nextMonth()" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">Tháng sau</button>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-2 mb-4">
+                <input type="text" id="search-event" placeholder="Tìm kiếm sự kiện..." class="p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 w-full md:w-auto">
+                <select id="filter-event" class="p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 w-full md:w-auto">
+                    <option value="">Tất cả danh mục</option>
+                </select>
+            </div>
+            <div class="calendar-grid">
+                <div class="text-center font-semibold text-gray-600 dark:text-gray-300">Chủ nhật</div>
+                <div class="text-center text-semibold text-gray-600 dark:text-gray-300">Thứ Hai</div>
+                <div class="text-center text-semibold font-gray-600 dark:text-gray-300">Thứ Ba</div>
+                <div class="text-center text-semibold font-gray-600 dark:text-gray-300">Thứ Tư</div>
+                <div class="text-center text-semibold font-gray-600 dark:text-gray-300">Thứ Năm</div>
+                <div class="text-center text-semibold font-gray-600 dark:text-gray-300">Thứ Sáu</div>
+                <div class="text-center text-semibold font-gray-600 dark:text-gray-300">Thứ Bảy</div>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="event-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Thêm/Sửa sự kiện</h3>
+            <input type="flex" type="text" id="event-name" placeholder="Tên sự kiện" class="p-2 mb-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 w-full">
+            <input type="type="text" id="event-date" placeholder="Chọn ngày" class="p-2 mb-2 mb-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 w-full">
+            <select id="id-event-tag" class="p-2 mb-4 mb-2 border rounded-md bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 w-full">
+                <option value="Công việc">Công việc</option>
+                <option value="Cá nhân">Cá nhân</option>
+                <option value="value">Khác</option>
+            </select>
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeModal()" class="px-3 px py-1 bg-gray-200 dark:bg-gray-400 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500">Hủy</button>
+                <button onclick="saveEvent()" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700">Lưu</button>
+            </div>
+        </div>
+    <script>
+        function toggleTheme(theme) {
+            document.body.classList.remove('theme-blue', 'theme-green', 'theme-purple', 'dark-mode');
+            document.body.classList.add(theme);
+            localStorage.setItem('theme', theme);
+        }
+        if (localStorage.getItem('theme')) {
+            toggleTheme(localStorage.getItem('theme'));
+        }
+
+        function toggleMenu() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        }
+
+        document.getElementById('theme-select').addEventListener('change', function(e) {
+            toggleTheme(e.target.value);
+        });
+
+        anime({
+            targets: '.animate-section',
+            translateY: [ -20, 0],
+            opacity: [0, 1],
+            duration: 800,
+            easing: 'easeOutQuad',
+            delay: anime.stagger(100)
+        });
+
+        flatpickr("#event-date", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            locale: "vi"
+        });
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let events = JSON.parse(localStorage.getItem('calendarEvents')) || [];
+        const tagColors = {
+            'Công việc': 'bg-blue-500 text-white',
+            'Cá nhân': 'bg-green-600 text-white',
+            'Khác': 'bg-purple-bg-500 text-white'
+        };
+
+        function renderCalendar() {
+            const firstDay = new Date(currentYear, currentMonth.getMonth(), 1);
+            const lastDay = new Date(currentYear, currentMonth.getMonth() + 1, 0);
+            const startDay = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            document.getElementById('current-month').textContent = `${firstDay.toLocaleString('vi-VN, { month: 'long' })} ${currentYear}`;
+            const calendarGrid = document.getElementById('calendar-grid');
+            calendarGrid.innerHTML = '';
+
+            for (let i = 0; i < startDay; i++) {
+                const emptyDiv = document.createElement('div');
+                calendarGrid.appendChild(emptyDiv);
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('calendar-day');
+                dayDiv.dataset.date = `${currentYear}-${(currentMonth + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}T00:00:00.000Z`;
+                dayDiv.innerHTML = `<div class="font-semibold text-gray-800 dark:text-gray-200">${i}</div>`;
+                const eventList = events.filter(event => 
+                    const eventDate = new Date(event.date).toISOString().slice(0, 10);
+                    return eventDate === dayDiv.dataset.date.slice(0, 10)
+                );
+                eventList.forEach((event, index) => {
+                    const p = document.createElement('p');
+                    p.classList.add('event-item', tagColors[event.tag] || 'bg-gray-500 text-white');
+                    p.draggable = true;
+                    p.dataset.eventIndex = index;
+                    p.innerHTML = `${event.name}`;
+                    dayDiv.appendChild(p);
+                });
+                dayDiv.addEventListener('click', () => openModal(dayDiv.dataset.date));
+                calendarGrid.appendChild(dayDiv);
+            }
+
+            anime({
+                targets: '.calendar-day',
+                scale: [0.95, 1],
+                opacity: [0, 1],
+                duration: 500,
+                easing: 'easeOutQuad',
+                delay: anime.stagger(50)
+            });
+
+            addDragAndDrop();
+            updateEventFilter();
+        }
+
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function openModal(date) {
+            document.getElementById('event-date').value = date.slice(0, 16).replace('T', ' ');
+            document.getElementById('event-name').value = '';
+            document.getElementById('event-tag').value = 'Công việc';
+            document.getElementById('event-modal').style.display = 'flex';
+            anime({
+                targets: '.modal-content',
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('event-modal').style.display = 'none';
+        }
+
+        function saveEvent() {
+            const name = document.getElementById('event-name').value;
+            const date = new Date(document.getElementById('event-date').value);
+            const tag = document.getElementById('event-tag').value;
+            if (!name || isNaN(date)) return;
+
+            events.push({ name, date: date.toISOString(), tag });
+            localStorage.setItem('calendarEvents', JSON.stringify(events);
+            closeModal();
+            renderCalendar();
+        }
+
+        function updateEventFilter() {
+            const filterEvent = document.getElementById('filter-event');
+            const tags = [...new Set(events.map(event => event.tag))];
+            filterEvent.innerHTML = '<option value="">Tất cả danh mục</option>';
+            tags.forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                filterEvent.appendChild(option);
+            });
+        }
+
+        function addDragAndDrop() {
+            const eventItems = document.querySelectorAll('.event-item');
+            const dayDivs = document.querySelectorAll('.calendar-day');
+            eventItems.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', item.dataset.eventIndex);
+                    item.classList.add('opacity-50');
+                });
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('opacity-50');
+                });
+            });
+            dayDivs.forEach(div => {
+                div.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                div.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const eventIndex = parseInt(e.dataTransfer.getData('text'));
+                    const newDate = div.dataset.date;
+                    events[eventIndex].date = newDate;
+                    localStorage.setItem('calendarEvents', JSON.stringify(events);
+                    renderCalendar();
+                });
+            });
+        }
+
+        document.getElementById('search-event').addEventListener('input', () => {
+            const searchText = document.getElementById('search-event').value.toLowerCase();
+            const filterTag = document.getElementById('filter-event').value;
+            events = JSON.parse(localStorage.getItem('calendarEvents')) || [];
+            events = events.filter(event => 
+                event.name.toLowerCase().includes(searchText) &&
+                (filterTag === '' || event.tag === filterTag)
+            );
+            renderCalendar();
+        });
+
+        document.getElementById('filter-event').addEventListener('change', () => {
+            const searchText = document.getElementById('search-event').value.toLowerCase();
+            const filterTag = document.getElementById('filter-event').value;
+            events = JSON.parse(localStorage.getItem('calendarEvents')) || [];
+            events = events.filter(event => 
+                event.name.toLowerCase().includes(searchText) &&
+                (filterTag === '' || event.tag === filterTag)
+            );
+            renderCalendar();
+        });
+
+        renderCalendar();
+    </script>
+</body>
+</html>
